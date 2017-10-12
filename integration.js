@@ -61,6 +61,16 @@ function doLookup(entities, options, cb) {
                     } else if (res.statusCode === 429) {
                         // reached rate limit
                         error = "Reached Daily Lookup Limit";
+                    } else {
+                        // Non 200 status code
+                        done({
+                            error: error,
+                            httpStatus: res.statusCode,
+                            body: body,
+                            detail: 'Unexpected Non 200 HTTP Status Code',
+                            entity: entity.value
+                        });
+                        return;
                     }
 
                     done(error, result);
