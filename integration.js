@@ -32,7 +32,7 @@ function doLookup(entities, options, cb) {
 
     entities.forEach(entity => {
         let isValid = true;
-        if(entity.isIPv6 && new Address6(entityObj.value).isValid() === false){
+        if(entity.isIPv6 && new Address6(entity.value).isValid() === false){
             isValid = false;
         }
         if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid){
