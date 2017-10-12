@@ -30,7 +30,11 @@ function doLookup(entities, options, cb) {
     Logger.trace(entities);
 
     entities.forEach(entity => {
-        if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value)){
+        let isValid = true;
+        if(entity.isIPv6 && new Address6(entityObj.value).isValid() === false){
+            isValid = false;
+        }
+        if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid){
             //do the lookup
             requestOptionsIp.uri = 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken;
             requestOptionsIp.method = 'GET';
