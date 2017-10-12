@@ -7,9 +7,10 @@ let net = require('net');
 let config = require('./config/config');
 let async = require('async');
 let fs = require('fs');
+let { Address6 } = require('ip-address');
 let Logger;
+let requestDefault;
 
-let requestOptionsIp = {};
 
 const IGNORED_IPS = new Set([
     '127.0.0.1',
@@ -30,15 +31,31 @@ function doLookup(entities, options, cb) {
     Logger.trace(entities);
 
     entities.forEach(entity => {
-        if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value)){
+        let isValid = true;
+        if(entity.isIPv6 && new Address6(entityObj.value).isValid() === false){
+            isValid = false;
+        }
+        if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid){
             //do the lookup
-            requestOptionsIp.uri = 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken;
-            requestOptionsIp.method = 'GET';
-            requestOptionsIp.json = true;
+            let requestOptions = {
+                uri: 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken,
+                method: 'GET',
+                json: true
+            };
 
-            Logger.debug({uri: requestOptionsIp}, 'Request URI');
+            Logger.debug({uri: requestOptions}, 'Request URI');
+
             tasks.push(function (done) {
-                request(requestOptionsIp, function (error, res, body) {
+                requestDefault(requestOptions, function (error, res, body) {
+                    if(error){
+                        done({
+                            error: error,
+                            entity: entity.value,
+                            detail: "Error in Request"
+                        });
+                        return;
+                    }
+
                     let result = {};
                     if (res.statusCode === 200) {
                         result = {
@@ -48,6 +65,16 @@ function doLookup(entities, options, cb) {
                     } else if (res.statusCode === 429) {
                         // reached rate limit
                         error = "Reached Daily Lookup Limit";
+                    } else {
+                        // Non 200 status code
+                        done({
+                            error: error,
+                            httpStatus: res.statusCode,
+                            body: body,
+                            detail: 'Unexpected Non 200 HTTP Status Code',
+                            entity: entity.value
+                        });
+                        return;
                     }
 
                     done(error, result);
@@ -91,6 +118,8 @@ function doLookup(entities, options, cb) {
             }
         });
 
+        Logger.trace({lookupResults:lookupResults}, 'Lookup Results');
+
         cb(null, lookupResults);
     });
 }
@@ -98,25 +127,29 @@ function doLookup(entities, options, cb) {
 function startup(logger) {
     Logger = logger;
 
+    let defaults = {};
+
     if (typeof config.request.cert === 'string' && config.request.cert.length > 0) {
-        requestOptionsIp.cert = fs.readFileSync(config.request.cert);
+        defaults.cert = fs.readFileSync(config.request.cert);
     }
 
     if (typeof config.request.key === 'string' && config.request.key.length > 0) {
-        requestOptionsIp.key = fs.readFileSync(config.request.key);
+        defaults.key = fs.readFileSync(config.request.key);
     }
 
     if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
-        requestOptionsIp.passphrase = config.request.passphrase;
+        defaults.passphrase = config.request.passphrase;
     }
 
     if (typeof config.request.ca === 'string' && config.request.ca.length > 0) {
-        requestOptionsIp.ca = fs.readFileSync(config.request.ca);
+        defaults.ca = fs.readFileSync(config.request.ca);
     }
 
     if (typeof config.request.proxy === 'string' && config.request.proxy.length > 0) {
-        requestOptionsIp.proxy = config.request.proxy;
+        defaults.proxy = config.request.proxy;
     }
+
+    requestDefault = request.defaults(defaults);
 }
 
 function validateOptions(userOptions, cb) {

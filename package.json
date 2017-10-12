@@ -1,17 +1,13 @@
 {
   "main": "./integration.js",
   "name": "ipinfo",
-  "version": "1.0.0-beta",
+  "version": "1.0.1-beta",
   "private": true,
   "dependencies": {
-    "request": "^2.75",
-    "lodash": "^4.16",
-    "async": "2.1.4"
-  },
-  "devDependencies": {
-    "chai": "~4.1",
-    "mocha": "~3.4",
-    "nock": "~9.0"
+    "request": "^2.83",
+    "lodash": "^4.17",
+    "async": "2.5.0",
+    "ip-address": "5.8.8"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive"
