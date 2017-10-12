@@ -22,7 +22,7 @@ Sample Information:
 }
 ```
 
-| ![image](https://user-images.githubusercontent.com/306319/28832954-eb068f96-76ab-11e7-91c3-50b54b101c01.png) |
+| ![image](https://user-images.githubusercontent.com/306319/31499616-4bba16fe-af33-11e7-8484-3f5c78b83103.png) |
 |---|
 |*ipinfo lookup examples* |
 
