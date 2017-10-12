@@ -43,6 +43,15 @@ function doLookup(entities, options, cb) {
             Logger.debug({uri: requestOptionsIp}, 'Request URI');
             tasks.push(function (done) {
                 request(requestOptionsIp, function (error, res, body) {
+                    if(error){
+                        done({
+                            error: error,
+                            entity: entity.value,
+                            detail: "Error in Request"
+                        });
+                        return;
+                    }
+
                     let result = {};
                     if (res.statusCode === 200) {
                         result = {
