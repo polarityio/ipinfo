@@ -2,7 +2,7 @@
 
 Polarity's IPInfo integration gives users access to automated IPv4 and IPv6 lookups within ipinfo.
 
-ipinfo is a free service that provides information about IPv4 and IPv6 addresses.  You can sign up for a paid ipinfo plan to increase your daily lookup limit.
+ipinfo is a REST based service that provides information about IPv4 and IPv6 addresses.  You can sign up for a paid ipinfo plan to increase your daily lookup limit.  The free plan is limited to 1000 lookups a day.
 
 Please see [https://ipinfo.io](https://ipinfo.io) for more information.
 

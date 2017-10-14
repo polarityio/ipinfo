@@ -152,21 +152,7 @@ function startup(logger) {
     requestDefault = request.defaults(defaults);
 }
 
-function validateOptions(userOptions, cb) {
-    let errors = [];
-    if (typeof userOptions.accessToken.value !== 'string' ||
-        (typeof userOptions.accessToken.value === 'string' && userOptions.accessToken.value.length === 0)) {
-        errors.push({
-            key: 'accessToken',
-            message: 'You must provide an ipinfo access token'
-        })
-    }
-
-    cb(null, errors);
-}
-
 module.exports = {
     doLookup: doLookup,
-    startup: startup,
-    validateOptions: validateOptions
+    startup: startup
 };
