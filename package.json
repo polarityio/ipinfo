@@ -7,9 +7,13 @@
     "request": "^2.83",
     "lodash": "^4.17",
     "async": "2.5.0",
-    "ip-address": "5.8.8"
+    "ip-address": "5.8.8",
+    "snyk": "^1.316.1"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --recursive"
-  }
+    "test": "./node_modules/.bin/mocha --recursive",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
+  },
+  "snyk": true
 }
