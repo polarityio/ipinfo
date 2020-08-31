@@ -95,9 +95,9 @@ function doLookup(entities, options, cb) {
                 resultsWithouContent
             });
         }
-        
+
         results.forEach(result => {
-            if(result.bogon){
+            if(result.bogon || !result.body){
                 lookupResults.push({
                     entity: result.entity,
                     data: null
