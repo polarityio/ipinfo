@@ -111,7 +111,15 @@ function doLookup(entities, options, cb) {
                 lookupResults.push({
                     entity: result.entity,
                     data: {
-                        summary: summary,
+                        summary: [
+                            ...(result.body.org ? [result.body.org] : []),
+                            ...(result.body.region || result.body.city || result.body.country
+                                ? [[result.body.city, result.body.region, result.body.country]
+                                    .filter((val) => val)
+                                    .join(', ')
+                                ]
+                                : [])
+                        ],
                         details: result.body
                     }
                 });
