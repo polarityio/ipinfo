@@ -47,78 +47,81 @@ function doLookup(entities, options, cb) {
 
             tasks.push(function (done) {
                 requestDefault(requestOptions, function (error, res, body) {
-                    if(error){
-                        done({
+                    if (error)
+                        return done({
                             error: error,
                             entity: entity.value,
-                            detail: "Error in Request"
+                            detail: 'Error in Request'
                         });
-                        return;
-                    }
 
-                    let result = {};
                     if (res.statusCode === 200) {
-                        result = {
+                        return done(null, {
                             entity: entity,
                             body: body
-                        };
+                        });
                     } else if (res.statusCode === 429) {
                         // reached rate limit
-                        error = "Reached Daily Lookup Limit";
-                    } else {
-                        // Non 200 status code
-                        done({
-                            error: error,
+                        return done({
+                            error: 'Reached Daily Lookup Limit',
                             httpStatus: res.statusCode,
                             body: body,
-                            detail: 'Unexpected Non 200 HTTP Status Code',
+                            detail: 'Reached Daily Lookup Limit',
                             entity: entity.value
                         });
-                        return;
                     }
 
-                    done(error, result);
+                    // Non 200 status code
+                    return done({
+                        error: error,
+                        httpStatus: res.statusCode,
+                        body: body,
+                        detail: 'Unexpected Non 200 HTTP Status Code',
+                        entity: entity.value
+                    });
                 });
             });
         }
     });
 
     async.parallelLimit(tasks, 10, (err, results) => {
-        if (err) {
-            cb(err);
-            return;
+        if (err)
+            return cb(err);
+
+        const resultsWithouContent = results.some((result) => !result || !result.entity);
+        if (resultsWithouContent.length) {
+            return cb({
+                error: 'Unexpected error from Results',
+                detail: 'Unexpected error from Results',
+                resultsWithouContent
+            });
         }
 
         results.forEach(result => {
-            if(result.bogon){
+            if(result.bogon || !result.body){
                 lookupResults.push({
-                    entity:result.entity,
+                    entity: result.entity,
                     data: null
                 });
-            }else{
-                let summary = [];
-                let geo = '';
-
-                if(result.body && result.body.region){
-                    geo = result.body.region;
-                }
-
-                if(result.body && result.body.country){
-                    geo += ', ' + result.body.country;
-                    summary.push(geo);
-                }
-
+            } else {
                 lookupResults.push({
                     entity: result.entity,
                     data: {
-                        summary: summary,
+                        summary: [
+                            ...(result.body.org ? [result.body.org] : []),
+                            ...(result.body.region || result.body.city || result.body.country
+                                ? [[result.body.city, result.body.region, result.body.country]
+                                    .filter((val) => val)
+                                    .join(', ')
+                                ]
+                                : [])
+                        ],
                         details: result.body
                     }
                 });
             }
         });
 
-        Logger.trace({lookupResults:lookupResults}, 'Lookup Results');
+        Logger.trace({ lookupResults }, 'Lookup Results');
 
         cb(null, lookupResults);
     });

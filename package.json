@@ -1,7 +1,7 @@
 {
   "main": "./integration.js",
   "name": "ipinfo",
-  "version": "1.0.5-beta",
+  "version": "3.0.6-beta",
   "private": true,
   "dependencies": {
     "request": "^2.88.2",
