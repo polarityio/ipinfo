@@ -1,7 +1,5 @@
 # Polarity IPInfo Integration
 
-![mode:on demand only](https://img.shields.io/badge/mode-on%20demand%20only-blue.svg)
-
 Polarity's IPInfo integration gives users access to automated IPv4 and IPv6 lookups within ipinfo.
 
 ipinfo is a REST based service that provides information about IPv4 and IPv6 addresses.  You can sign up for a paid ipinfo plan to increase your daily lookup limit.  The free plan is limited to 1000 lookups a day.
@@ -18,7 +16,7 @@ Please see [https://ipinfo.io](https://ipinfo.io) for more information.
 
 ### ipinfo Access Token
 
-Your ipinfo Access Token.  Note that lookups are throttled at 1000 per day unless you have a paid plan that has a higher limit. 
+Your ipinfo Access Token.  Note that lookups are throttled at 50,000 per month unless you have a paid plan that has a higher limit. 
 
 ## Installation Instructions
 
