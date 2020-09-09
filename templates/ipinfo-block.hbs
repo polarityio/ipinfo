@@ -1,1 +1,64 @@
-{{object-to-table block.data.details}}
+
+<h1 class="p-title">
+  {{fa-icon "info-circle" class="info-circle-icon"}} IP Info
+</h1>
+
+<div class="view-link">
+  <a class="p-link" href="https://ipinfo.io/account/search?query={{details.ip}}">View in ipinfo.io
+    {{fa-icon "external-link-square" class="external-link-icon"}}</a>
+</div>
+
+{{#if details.ip}}
+  <div>
+      <span class="p-key">IP: </span>
+      <span class="p-value">{{details.ip}}</span>
+  </div>
+{{/if}}
+{{#if details.hostname}}
+  <div>
+      <span class="p-key">Hostname: </span>
+      <span class="p-value">{{details.hostname}}</span>
+  </div>
+{{/if}}
+{{#if details.city}}
+  <div>
+      <span class="p-key">City: </span>
+      <span class="p-value">{{details.city}}</span>
+  </div>
+{{/if}}
+{{#if details.region}}
+  <div>
+      <span class="p-key">Region: </span>
+      <span class="p-value">{{details.region}}</span>
+  </div>
+{{/if}}
+{{#if details.country}}
+  <div>
+      <span class="p-key">Country: </span>
+      <span class="p-value">{{details.country}}</span>
+  </div>
+{{/if}}
+{{#if details.loc}}
+  <div>
+      <span class="p-key">Location: </span>
+      <span class="p-value">{{details.loc}}</span>
+  </div>
+{{/if}}
+{{#if details.org}}
+  <div>
+      <span class="p-key">Organization: </span>
+      <span class="p-value">{{details.org}}</span>
+  </div>
+{{/if}}
+{{#if details.postal}}
+  <div>
+      <span class="p-key">Postal: </span>
+      <span class="p-value">{{details.postal}}</span>
+  </div>
+{{/if}}
+{{#if details.phone}}
+  <div>
+      <span class="p-key">Phone: </span>
+      <span class="p-value">{{details.phone}}</span>
+  </div>
+{{/if}}
