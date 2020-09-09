@@ -82,7 +82,7 @@ module.exports = {
             key: 'accessToken',
             name: 'ipinfo Access Token',
             description:
-                'Your ipinfo Access Token.  Note that lookups are throttled at 1000 per day unless you have a paid plan that has a higher limit. ',
+                'Your ipinfo Access Token.  Note that lookups are throttled to 50000 per month unless you have a paid plan that has a higher limit. An API Key is optional for non-commercial use.',
             default: '',
             type: 'password',
             userCanEdit: true,

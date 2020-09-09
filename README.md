@@ -16,7 +16,7 @@ Please see [https://ipinfo.io](https://ipinfo.io) for more information.
 
 ### ipinfo Access Token
 
-Your ipinfo Access Token.  Note that lookups are throttled at 50,000 per month unless you have a paid plan that has a higher limit. 
+Your ipinfo Access Token.  Note that lookups are throttled to 50000 per month unless you have a paid plan that has a higher limit. An API Key is optional for non-commercial use. 
 
 ## Installation Instructions
 
