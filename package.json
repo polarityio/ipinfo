@@ -4,10 +4,10 @@
   "main": "./integration.js",
   "private": true,
   "dependencies": {
-    "request": "^2.88.2",
-    "lodash": "^4.17.19",
     "async": "^3.2.0",
-    "ip-address": "^6.3.0"
+    "ip-address": "^6.3.0",
+    "lodash": "^4.17.19",
+    "postman-request": "^2.88.1-postman.32"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive"
