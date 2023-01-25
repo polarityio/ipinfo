@@ -1,42 +1,38 @@
 {
-  "name": "ipinfo",
-  "acronym": "IP",
-  "description": "IPInfo Integration for IP Address Reports",
-  "entityTypes": [
-    "IPv4",
-    "IPv6"
-  ],
-  "styles": [
-    "./styles/ipinfo.less"
-  ],
-  "block": {
-    "component": {
-      "file": "./components/ipinfo-block.js"
+    "name": "ipinfo",
+    "acronym": "IP",
+    "defaultColor": "light-grey",
+    "description": "IPInfo Integration for IP Address Reports",
+    "entityTypes": ["IPv4", "IPv6"],
+    "styles": ["./styles/ipinfo.less"],
+    "block": {
+        "component": {
+            "file": "./components/ipinfo-block.js"
+        },
+        "template": {
+            "file": "./templates/ipinfo-block.hbs"
+        }
     },
-    "template": {
-      "file": "./templates/ipinfo-block.hbs"
-    }
-  },
-  "request": {
-    "cert": "",
-    "key": "",
-    "passphrase": "",
-    "ca": "",
-    "proxy": "",
-    "rejectUnauthorized": true
-  },
-  "logging": {
-    "level": "info"
-  },
-  "options": [
-    {
-      "key": "accessToken",
-      "name": "ipinfo Access Token",
-      "description": "Your ipinfo Access Token.  Note that lookups are throttled to 50000 per month unless you have a paid plan that has a higher limit. An API Key is optional for non-commercial use.",
-      "default": "",
-      "type": "password",
-      "userCanEdit": true,
-      "adminOnly": false
-    }
-  ]
+    "request": {
+        "cert": "",
+        "key": "",
+        "passphrase": "",
+        "ca": "",
+        "proxy": "",
+        "rejectUnauthorized": true
+    },
+    "logging": {
+        "level": "info"
+    },
+    "options": [
+        {
+            "key": "accessToken",
+            "name": "ipinfo Access Token",
+            "description": "Your ipinfo Access Token.  Note that lookups are throttled to 50000 per month unless you have a paid plan that has a higher limit. An API Key is optional for non-commercial use.",
+            "default": "",
+            "type": "password",
+            "userCanEdit": true,
+            "adminOnly": false
+        }
+    ]
 }
