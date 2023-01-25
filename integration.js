@@ -1,6 +1,6 @@
 'use strict';
 
-let request = require('request');
+let request = require('postman-request');
 let _ = require('lodash');
 let util = require('util');
 let net = require('net');
