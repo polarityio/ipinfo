@@ -1,7 +1,7 @@
 {
     "name": "ipinfo",
     "acronym": "IP",
-    "defaultColor": "light-grey",
+    "defaultColor": "light-gray",
     "description": "IPInfo Integration for IP Address Reports",
     "entityTypes": ["IPv4", "IPv6"],
     "styles": ["./styles/ipinfo.less"],
