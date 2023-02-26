@@ -1,81 +1,79 @@
-<div class="ip-info-title">
-    <h1 class="p-title">
-        {{fa-icon "info-circle" class="info-circle-icon"}}
-        IP Info
-    </h1>
-
-    <div class="d-flex align-items-center justify-content-end copy-btn-container">
-        <button
-            class="btn copy-btn p-action"
-            {{action "copyData"}}
-            title="Copy Information to Clipboard"
-        >
-            {{fa-icon icon="clipboard" fixedWidth=true}}
-        </button>
-        <div class="copy-success-message {{if showCopyMessage 'visible' 'hidden'}}">
-            {{fa-icon icon="check" fixedWidth=true class="copy-success-icon"}}
-            Copied Information.
-        </div>
-    </div>
+<div class="d-flex align-items-center justify-content-end copy-btn-container">
+  <button
+    class="btn copy-btn p-action"
+    {{action "copyData"}}
+    title="Copy Information to Clipboard"
+  >
+    {{fa-icon icon="clipboard" fixedWidth=true}}
+  </button>
+  <div class="copy-success-message {{if showCopyMessage 'visible' 'hidden'}}">
+    {{fa-icon icon="check" fixedWidth=true class="copy-success-icon"}}
+    Copied Information.
+  </div>
 </div>
 
-<div class="view-link">
-    <a class="p-link" href="https://ipinfo.io/account/search?query={{details.ip}}">View in ipinfo.io
-        {{fa-icon "external-link-square" class="external-link-icon"}}</a>
-</div>
 <div id={{concat "info-container-" uniqueIdPrefix}}>
-    {{#if details.ip}}
-        <div>
-            <span class="p-key">IP: </span>
-            <span class="p-value">{{details.ip}}</span>
-        </div>
-    {{/if}}
-    {{#if details.hostname}}
-        <div>
-            <span class="p-key">Hostname: </span>
-            <span class="p-value">{{details.hostname}}</span>
-        </div>
-    {{/if}}
-    {{#if details.city}}
-        <div>
-            <span class="p-key">City: </span>
-            <span class="p-value">{{details.city}}</span>
-        </div>
-    {{/if}}
-    {{#if details.region}}
-        <div>
-            <span class="p-key">Region: </span>
-            <span class="p-value">{{details.region}}</span>
-        </div>
-    {{/if}}
-    {{#if details.country}}
-        <div>
-            <span class="p-key">Country: </span>
-            <span class="p-value">{{details.country}}</span>
-        </div>
-    {{/if}}
-    {{#if details.loc}}
-        <div>
-            <span class="p-key">Location: </span>
-            <span class="p-value">{{details.loc}}</span>
-        </div>
-    {{/if}}
-    {{#if details.org}}
-        <div>
-            <span class="p-key">Organization: </span>
-            <span class="p-value">{{details.org}}</span>
-        </div>
-    {{/if}}
-    {{#if details.postal}}
-        <div>
-            <span class="p-key">Postal: </span>
-            <span class="p-value">{{details.postal}}</span>
-        </div>
-    {{/if}}
-    {{#if details.phone}}
-        <div>
-            <span class="p-key">Phone: </span>
-            <span class="p-value">{{details.phone}}</span>
-        </div>
-    {{/if}}
+  <div>
+    <a class="p-link" href="https://ipinfo.io/account/search?query={{details.ip}}">View in ipinfo.io
+      {{fa-icon icon="external-link-square" class="external-link-icon"}}</a>
+  </div>
+  <h1 class="p-title">
+      {{fa-icon icon="info-circle" class="info-circle-icon"}}
+      IP Info
+  </h1>
+
+  {{#if details.ip}}
+      <div>
+          <span class="p-key">IP: </span>
+          <span class="p-value">{{details.ip}}</span>
+      </div>
+  {{/if}}
+  {{#if details.hostname}}
+      <div>
+          <span class="p-key">Hostname: </span>
+          <span class="p-value">{{details.hostname}}</span>
+      </div>
+  {{/if}}
+  {{#if details.city}}
+      <div>
+          <span class="p-key">City: </span>
+          <span class="p-value">{{details.city}}</span>
+      </div>
+  {{/if}}
+  {{#if details.region}}
+      <div>
+          <span class="p-key">Region: </span>
+          <span class="p-value">{{details.region}}</span>
+      </div>
+  {{/if}}
+  {{#if details.country}}
+      <div>
+          <span class="p-key">Country: </span>
+          <span class="p-value">{{details.country}}</span>
+      </div>
+  {{/if}}
+  {{#if details.loc}}
+      <div>
+          <span class="p-key">Location: </span>
+          <span class="p-value">{{details.loc}}</span>
+      </div>
+  {{/if}}
+  {{#if details.org}}
+      <div>
+          <span class="p-key">Organization: </span>
+          <span class="p-value">{{details.org}}</span>
+      </div>
+  {{/if}}
+  {{#if details.postal}}
+      <div>
+          <span class="p-key">Postal: </span>
+          <span class="p-value">{{details.postal}}</span>
+      </div>
+  {{/if}}
+  {{#if details.phone}}
+      <div>
+          <span class="p-key">Phone: </span>
+          <span class="p-value">{{details.phone}}</span>
+      </div>
+  {{/if}}
 </div>
