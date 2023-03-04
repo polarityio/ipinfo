@@ -2,8 +2,6 @@
 
 let request = require('postman-request');
 let _ = require('lodash');
-let util = require('util');
-let net = require('net');
 let config = require('./config/config');
 let async = require('async');
 let fs = require('fs');
@@ -11,12 +9,7 @@ let { Address6 } = require('ip-address');
 let Logger;
 let requestDefault;
 
-
-const IGNORED_IPS = new Set([
-    '127.0.0.1',
-    '255.255.255.255',
-    '0.0.0.0'
-]);
+const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
 
 /**
  *
@@ -24,18 +17,18 @@ const IGNORED_IPS = new Set([
  * @param options
  * @param cb
  */
-function doLookup(entities, options, cb) {
+function doLookup (entities, options, cb) {
     let lookupResults = [];
     let tasks = [];
 
     Logger.trace(entities);
 
-    entities.forEach(entity => {
+    entities.forEach((entity) => {
         let isValid = true;
-        if(entity.isIPv6 && new Address6(entity.value).isValid() === false){
+        if (entity.isIPv6 && new Address6(entity.value).isValid() === false) {
             isValid = false;
         }
-        if(!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid){
+        if (!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid) {
             //do the lookup
             let requestOptions = {
                 uri: 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken,
@@ -43,7 +36,7 @@ function doLookup(entities, options, cb) {
                 json: true
             };
 
-            Logger.debug({uri: requestOptions}, 'Request URI');
+            Logger.debug({ uri: requestOptions }, 'Request URI');
 
             tasks.push(function (done) {
                 requestDefault(requestOptions, function (error, res, body) {
@@ -84,8 +77,7 @@ function doLookup(entities, options, cb) {
     });
 
     async.parallelLimit(tasks, 10, (err, results) => {
-        if (err)
-            return cb(err);
+        if (err) return cb(err);
 
         const resultsWithouContent = results.some((result) => !result || !result.entity);
         if (resultsWithouContent.length) {
@@ -96,8 +88,8 @@ function doLookup(entities, options, cb) {
             });
         }
 
-        results.forEach(result => {
-            if(result.bogon || !result.body){
+        results.forEach((result) => {
+            if (result.bogon || !result.body) {
                 lookupResults.push({
                     entity: result.entity,
                     data: null
@@ -109,10 +101,11 @@ function doLookup(entities, options, cb) {
                         summary: [
                             ...(result.body.org ? [result.body.org] : []),
                             ...(result.body.region || result.body.city || result.body.country
-                                ? [[result.body.city, result.body.region, result.body.country]
-                                    .filter((val) => val)
-                                    .join(', ')
-                                ]
+                                ? [
+                                      [result.body.city, result.body.region, result.body.country]
+                                          .filter((val) => val)
+                                          .join(', ')
+                                  ]
                                 : [])
                         ],
                         details: result.body
@@ -127,7 +120,7 @@ function doLookup(entities, options, cb) {
     });
 }
 
-function startup(logger) {
+function startup (logger) {
     Logger = logger;
 
     let defaults = {};
