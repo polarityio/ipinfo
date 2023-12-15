@@ -1,15 +1,15 @@
 'use strict';
 
-let request = require('postman-request');
-let _ = require('lodash');
-let config = require('./config/config');
-let async = require('async');
-let fs = require('fs');
+const request = require('postman-request');
+const _ = require('lodash');
+const config = require('./config/config');
+const async = require('async');
+const fs = require('fs');
+const countryLookup = require('country-code-lookup');
 let { Address6 } = require('ip-address');
+
 let Logger;
 let requestDefault;
-
-const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
 
 /**
  *
@@ -23,12 +23,19 @@ function doLookup(entities, options, cb) {
 
   Logger.trace(entities);
 
+  // const data = require('./test/test-ip-data.json');
+  // return cb(null, [
+  //   {
+  //     entity: entities[0],
+  //     data: {
+  //       summary: getSummaryTags(data),
+  //       details: data
+  //     }
+  //   }
+  // ]);
+
   entities.forEach((entity) => {
-    let isValid = true;
-    if (entity.isIPv6 && new Address6(entity.value).isValid() === false) {
-      isValid = false;
-    }
-    if (!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid) {
+    if (isValidIp(entity)) {
       //do the lookup
       let requestOptions = {
         uri: 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken,
@@ -79,12 +86,12 @@ function doLookup(entities, options, cb) {
   async.parallelLimit(tasks, 10, (err, results) => {
     if (err) return cb(err);
 
-    const resultsWithouContent = results.some((result) => !result || !result.entity);
-    if (resultsWithouContent.length) {
+    const resultsWithoutContent = results.some((result) => !result || !result.entity);
+    if (resultsWithoutContent.length) {
       return cb({
         error: 'Unexpected error from Results',
         detail: 'Unexpected error from Results',
-        resultsWithouContent
+        resultsWithoutContent
       });
     }
 
@@ -95,19 +102,16 @@ function doLookup(entities, options, cb) {
           data: null
         });
       } else {
+        if (result.body.country) {
+          let country = countryLookup.byIso(result.body.country);
+          if (country) {
+            result.body._fullCountryName = country.country;
+          }
+        }
         lookupResults.push({
           entity: result.entity,
           data: {
-            summary: [
-              ...(result.body.org ? [result.body.org] : []),
-              ...(result.body.region || result.body.city || result.body.country
-                ? [
-                    [result.body.city, result.body.region, result.body.country]
-                      .filter((val) => val)
-                      .join(', ')
-                  ]
-                : [])
-            ],
+            summary: getSummaryTags(result.body),
             details: result.body
           }
         });
@@ -118,6 +122,86 @@ function doLookup(entities, options, cb) {
 
     cb(null, lookupResults);
   });
+}
+
+const isLoopBackIp = (entity) => {
+  return entity.startsWith('127');
+};
+
+const isLinkLocalAddress = (entity) => {
+  return entity.startsWith('169');
+};
+
+const isPrivateIP = (entity) => {
+  return entity.isPrivateIP === true;
+};
+
+const isValidIp = (entity) => {
+  if (entity.isIPv6 && new Address6(entity.value).isValid() === false) {
+    return false;
+  }
+  return !(isLoopBackIp(entity.value) || isLinkLocalAddress(entity.value) || isPrivateIP(entity));
+};
+
+function isUpperCase(str) {
+  return str === str.toUpperCase();
+}
+
+function getSummaryTags(body) {
+  const tags = [];
+
+  if (body.privacy && body.privacy.vpn) {
+    tags.push('VPN');
+  }
+
+  if (body.privacy && body.privacy.proxy) {
+    tags.push('Proxy');
+  }
+
+  if (body.privacy && body.privacy.tor) {
+    tags.push('Tor');
+  }
+
+  if (body.privacy && body.privacy.hosting) {
+    tags.push('Hosting');
+  }
+
+  if (body.org) {
+    // The `org` property is only on the free plan and includes both the ASN# and org info
+    // For example, "AS15169 Google LLC"
+    // we only want the org info so we split off the ASN#
+    let tokens = body.org.split(' ');
+    if (tokens.length > 1) {
+      let orgName = tokens.slice(1).join(' ');
+      // some org names are in all uppercase which looks bad so we make those lowercase
+      if (isUpperCase(orgName)) {
+        tags.push(orgName.toLowerCase());
+      } else {
+        tags.push(orgName);
+      }
+    }
+  } else if (body.asn && body.asn.name) {
+    // paid plans use the more details asn object
+    // some org names are in all uppercase which looks bad so we make those lowercase
+    if (isUpperCase(body.asn.name)) {
+      tags.push(body.asn.name.toLowerCase());
+    } else {
+      tags.push(body.asn.name);
+    }
+  }
+
+  if (body.country) {
+    let country = countryLookup.byIso(body.country);
+    if (country) {
+      // this is the full country name
+      tags.push(country.country);
+    } else {
+      // this is the 2 digit code provided by IPInfo
+      tags.push(body.country);
+    }
+  }
+
+  return tags;
 }
 
 function startup(logger) {
