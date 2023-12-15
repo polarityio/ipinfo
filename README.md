@@ -21,7 +21,6 @@ The information displayed by the integration depends on the level of your API ke
 | Privacy     |      |         | ✓        | ✓         | ✓          |
 | Company     |      |         |          | ✓         | ✓          |
 | Carrier     |      |         |          | ✓         | ✓          |
-| Carrier     |      |         |          | ✓         | ✓          |
 | Abuse       |      |         |          | ✓         | ✓          |
 | Domains     |      |         |          | ✓         | ✓          |
 
