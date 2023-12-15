@@ -49,7 +49,13 @@
   {{#if details.country}}
       <div>
           <span class="p-key">Country: </span>
-          <span class="p-value">{{details.country}}</span>
+          <span class="p-value">
+            {{#if details._fullCountryName}}
+              {{details._fullCountryName}} ({{details.country}})
+            {{else}}
+              {{details.country}}
+            {{/if}}
+          </span>
       </div>
   {{/if}}
   {{#if details.loc}}
@@ -61,7 +67,7 @@
   {{#if details.org}}
       <div>
           <span class="p-key">Organization: </span>
-          <span class="p-value">{{details.org}}</span>
+          <span class="p-value p-block">{{details.org}}</span>
       </div>
   {{/if}}
   {{#if details.postal}}
@@ -75,5 +81,196 @@
           <span class="p-key">Phone: </span>
           <span class="p-value">{{details.phone}}</span>
       </div>
+  {{/if}}
+
+  {{!-- Privacy fields are only available on Standard, Business, and Enterprise plans --}}
+  {{#if details.privacy}}
+    <h1 class="p-title">
+      {{fa-icon icon="blinds" fixedWidth=true}}
+      Privacy Info
+    </h1>
+  {{/if}}
+  {{#if details.privacy.vpn}}
+    <div>
+      <span class="p-key">VPN: </span>
+      <span class="p-value">{{details.privacy.vpn}}</span>
+    </div>
+  {{/if}}
+  {{#if details.privacy.service}}
+    <div>
+      <span class="p-key">Service: </span>
+      <span class="p-value">{{details.privacy.service}}</span>
+    </div>
+  {{/if}}
+  {{#if details.privacy.proxy}}
+    <div>
+      <span class="p-key">Proxy: </span>
+      <span class="p-value">{{details.privacy.proxy}}</span>
+    </div>
+  {{/if}}
+  {{#if details.privacy.tor}}
+    <div>
+      <span class="p-key">TOR: </span>
+      <span class="p-value">{{details.privacy.tor}}</span>
+    </div>
+  {{/if}}
+  {{#if details.privacy.relay}}
+    <div>
+      <span class="p-key">Relay: </span>
+      <span class="p-value">{{details.privacy.relay}}</span>
+    </div>
+  {{/if}}
+  {{#if details.privacy.hosting}}
+    <div>
+      <span class="p-key">Hosting: </span>
+      <span class="p-value">{{details.privacy.hosting}}</span>
+    </div>
+  {{/if}}
+
+  {{!-- ASN fields are only available on Basic, Standard, Business, and Enterprise plans --}}
+  {{#if details.asn}}
+    <h1 class="p-title">
+      {{fa-icon icon="chart-network" fixedWidth=true}}
+      ASN Info
+    </h1>
+  {{/if}}
+  {{#if details.asn.asn}}
+    <div>
+      <span class="p-key">ASN: </span>
+      <span class="p-value">{{details.asn.asn}}</span>
+    </div>
+  {{/if}}
+  {{#if details.asn.name}}
+    <div>
+      <span class="p-key">Org Name: </span>
+      <span class="p-value">{{details.asn.name}}</span>
+    </div>
+  {{/if}}
+  {{#if details.asn.domain}}
+    <div>
+      <span class="p-key">Org Domain: </span>
+      <span class="p-value">{{details.asn.domain}}</span>
+    </div>
+  {{/if}}
+  {{#if details.asn.route}}
+    <div>
+      <span class="p-key">Type: </span>
+      <span class="p-value">{{details.asn.type}}</span>
+    </div>
+  {{/if}}
+
+  {{!-- Company fields are only available on Business, and Enterprise plans --}}
+  {{#if details.company}}
+    <h1 class="p-title">
+      {{fa-icon icon="building" fixedWidth=true}}
+      Company Info
+    </h1>
+  {{/if}}
+  {{#if details.company.name}}
+    <div>
+      <span class="p-key">Name: </span>
+      <span class="p-value">{{details.company.name}}</span>
+    </div>
+  {{/if}}
+  {{#if details.company.domain}}
+    <div>
+      <span class="p-key">Domain: </span>
+      <span class="p-value">{{details.company.domain}}</span>
+    </div>
+  {{/if}}
+  {{#if details.company.type}}
+    <div>
+      <span class="p-key">Type: </span>
+      <span class="p-value">{{details.company.type}}</span>
+    </div>
+  {{/if}}
+
+  {{!-- Carrier fields are only available on Business, and Enterprise plans --}}
+  {{#if details.carrier}}
+    <h1 class="p-title">
+      {{fa-icon icon="phone-office" fixedWidth=true}}
+      Carrier Info
+    </h1>
+  {{/if}}
+  {{#if details.carrier.name}}
+    <div>
+      <span class="p-key">Name: </span>
+      <span class="p-value">{{details.carrier.name}}</span>
+    </div>
+  {{/if}}
+  {{#if details.carrier.mcc}}
+    <div>
+      <span class="p-key">MCC: </span>
+      <span class="p-value">{{details.carrier.mcc}}</span>
+    </div>
+  {{/if}}
+  {{#if details.carrier.mnc}}
+    <div>
+      <span class="p-key">MNC: </span>
+      <span class="p-value">{{details.carrier.mnc}}</span>
+    </div>
+  {{/if}}
+
+  {{!-- Domain fields are only available on Business, and Enterprise plans --}}
+  {{#if details.domains}}
+    <h1 class="p-title">
+      {{fa-icon icon="globe" fixedWidth=true}}
+      Domains
+    </h1>
+    <div>
+      <span class="p-key">Total: </span>
+      <span class="p-value">{{details.domains.total}}</span>
+    </div>
+    <div class="mt-1">
+      {{#each details.domains.domains as | domain |}}
+        <span class="tag">
+          {{domain}}
+        </span>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{!-- Abuse fields are only available on Business, and Enterprise plans --}}
+  {{#if details.abuse}}
+    <h1 class="p-title">
+      {{fa-icon icon="phone" fixedWidth=true}}
+      Abuse Info
+    </h1>
+  {{/if}}
+  {{#if details.abuse.address}}
+    <div>
+      <span class="p-key">Address: </span>
+      <span class="p-value p-block">{{details.abuse.address}}</span>
+    </div>
+  {{/if}}
+  {{#if details.abuse.country}}
+    <div>
+      <span class="p-key">Name: </span>
+      <span class="p-value">{{details.abuse.country}}</span>
+    </div>
+  {{/if}}
+  {{#if details.abuse.email}}
+    <div>
+      <span class="p-key">Email: </span>
+      <span class="p-value">{{details.abuse.email}}</span>
+    </div>
+  {{/if}}
+  {{#if details.abuse.name}}
+    <div>
+      <span class="p-key">Name: </span>
+      <span class="p-value">{{details.abuse.name}}</span>
+    </div>
+  {{/if}}
+  {{#if details.abuse.network}}
+    <div>
+      <span class="p-key">Network: </span>
+      <span class="p-value">{{details.abuse.network}}</span>
+    </div>
+  {{/if}}
+  {{#if details.abuse.phone}}
+    <div>
+      <span class="p-key">Phone: </span>
+      <span class="p-value">{{details.abuse.phone}}</span>
+    </div>
   {{/if}}
 </div>

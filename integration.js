@@ -1,15 +1,15 @@
 'use strict';
 
-let request = require('postman-request');
-let _ = require('lodash');
-let config = require('./config/config');
-let async = require('async');
-let fs = require('fs');
+const request = require('postman-request');
+const _ = require('lodash');
+const config = require('./config/config');
+const async = require('async');
+const fs = require('fs');
+const countryLookup = require('country-code-lookup');
 let { Address6 } = require('ip-address');
+
 let Logger;
 let requestDefault;
-
-const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
 
 /**
  *
@@ -17,138 +17,252 @@ const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
  * @param options
  * @param cb
  */
-function doLookup (entities, options, cb) {
-    let lookupResults = [];
-    let tasks = [];
+function doLookup(entities, options, cb) {
+  let lookupResults = [];
+  let tasks = [];
 
-    Logger.trace(entities);
+  Logger.trace({ entities }, 'doLookup');
 
-    entities.forEach((entity) => {
-        let isValid = true;
-        if (entity.isIPv6 && new Address6(entity.value).isValid() === false) {
-            isValid = false;
-        }
-        if (!entity.isPrivateIP && !IGNORED_IPS.has(entity.value) && isValid) {
-            //do the lookup
-            let requestOptions = {
-                uri: 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken,
-                method: 'GET',
-                json: true
-            };
+  // This block of code is specifically for testing sample enterprise data results:
 
-            Logger.debug({ uri: requestOptions }, 'Request URI');
+  // const data = require('./test/test-ip-data.json');
+  // return cb(null, [
+  //   {
+  //     entity: entities[0],
+  //     data: {
+  //       summary: getSummaryTags(data),
+  //       details: data
+  //     }
+  //   }
+  // ]);
 
-            tasks.push(function (done) {
-                requestDefault(requestOptions, function (error, res, body) {
-                    if (error)
-                        return done({
-                            error: error,
-                            entity: entity.value,
-                            detail: 'Error in Request'
-                        });
+  entities.forEach((entity) => {
+    if (isValidIp(entity)) {
+      //do the lookup
+      let requestOptions = {
+        uri: 'https://ipinfo.io/' + entity.value + '/json?token=' + options.accessToken,
+        method: 'GET',
+        json: true
+      };
 
-                    if (res.statusCode === 200) {
-                        return done(null, {
-                            entity: entity,
-                            body: body
-                        });
-                    } else if (res.statusCode === 429) {
-                        // reached rate limit
-                        return done({
-                            error: 'Reached Daily Lookup Limit',
-                            httpStatus: res.statusCode,
-                            body: body,
-                            detail: 'Reached Daily Lookup Limit',
-                            entity: entity.value
-                        });
-                    }
+      Logger.debug({ uri: requestOptions }, 'Request URI');
 
-                    // Non 200 status code
-                    return done({
-                        error: error,
-                        httpStatus: res.statusCode,
-                        body: body,
-                        detail: 'Unexpected Non 200 HTTP Status Code',
-                        entity: entity.value
-                    });
-                });
+      tasks.push(function (done) {
+        requestDefault(requestOptions, function (error, res, body) {
+          if (error)
+            return done({
+              error: error,
+              entity: entity.value,
+              detail: 'Error in Request'
             });
-        }
-    });
 
-    async.parallelLimit(tasks, 10, (err, results) => {
-        if (err) return cb(err);
+          Logger.trace({ statusCode: res.statusCode, body }, 'Lookup Result');
 
-        const resultsWithouContent = results.some((result) => !result || !result.entity);
-        if (resultsWithouContent.length) {
-            return cb({
-                error: 'Unexpected error from Results',
-                detail: 'Unexpected error from Results',
-                resultsWithouContent
+          if (res.statusCode === 200) {
+            return done(null, {
+              entity: entity,
+              body: body
             });
-        }
+          } else if (res.statusCode === 429) {
+            // reached rate limit
+            return done({
+              error: 'Reached Daily Lookup Limit',
+              httpStatus: res.statusCode,
+              body: body,
+              detail: 'Reached Daily Lookup Limit',
+              entity: entity.value
+            });
+          }
 
-        results.forEach((result) => {
-            if (result.bogon || !result.body) {
-                lookupResults.push({
-                    entity: result.entity,
-                    data: null
-                });
-            } else {
-                lookupResults.push({
-                    entity: result.entity,
-                    data: {
-                        summary: [
-                            ...(result.body.org ? [result.body.org] : []),
-                            ...(result.body.region || result.body.city || result.body.country
-                                ? [
-                                      [result.body.city, result.body.region, result.body.country]
-                                          .filter((val) => val)
-                                          .join(', ')
-                                  ]
-                                : [])
-                        ],
-                        details: result.body
-                    }
-                });
-            }
+          // Non 200 status code
+          return done({
+            error: error,
+            httpStatus: res.statusCode,
+            body: body,
+            detail: 'Unexpected Non 200 HTTP Status Code',
+            entity: entity.value
+          });
         });
+      });
+    }
+  });
 
-        Logger.trace({ lookupResults }, 'Lookup Results');
+  async.parallelLimit(tasks, 10, (err, results) => {
+    if (err) return cb(err);
 
-        cb(null, lookupResults);
+    const resultsWithoutContent = results.some((result) => !result || !result.entity);
+    if (resultsWithoutContent.length) {
+      return cb({
+        error: 'Unexpected error from Results',
+        detail: 'Unexpected error from Results',
+        resultsWithoutContent
+      });
+    }
+
+    results.forEach((result) => {
+      /**
+       There are strange 200 responses for some IPv6 results that look like this:
+        ```
+        body: {
+          "ip": "2345:425:2ca1::567:5673:23b5",
+          "readme": "https://ipinfo.io/missingauth"
+        }
+       ```
+
+       and in other cases like this:
+
+       ```
+       body: {
+        "ip": "2345:425:2ca1::567:5673:23b5",
+        }
+       ```
+
+       We try to filter these out using the Object.keys length call
+      **/
+      if (!result.body || result.body.bogon || Object.keys(result.body).length <= 2) {
+        lookupResults.push({
+          entity: result.entity,
+          data: null
+        });
+      } else {
+        if (result.body.country) {
+          let country = countryLookup.byIso(result.body.country);
+          if (country) {
+            result.body._fullCountryName = country.country;
+          }
+        }
+        lookupResults.push({
+          entity: result.entity,
+          data: {
+            summary: getSummaryTags(result.body),
+            details: result.body
+          }
+        });
+      }
     });
+
+    Logger.trace({ lookupResults }, 'Lookup Results');
+
+    cb(null, lookupResults);
+  });
 }
 
-function startup (logger) {
-    Logger = logger;
+const isLoopBackIp = (entity) => {
+  return entity.startsWith('127');
+};
 
-    let defaults = {};
+const isLinkLocalAddress = (entity) => {
+  return entity.startsWith('169');
+};
 
-    if (typeof config.request.cert === 'string' && config.request.cert.length > 0) {
-        defaults.cert = fs.readFileSync(config.request.cert);
+const isPrivateIP = (entity) => {
+  return entity.isPrivateIP === true;
+};
+
+const isValidIp = (entity) => {
+  if (entity.isIPv6) {
+    try {
+      // throws an error if the IP is not a valid IPv6
+      let ipv6 = new Address6(entity.value);
+    } catch (err) {
+      return false;
     }
 
-    if (typeof config.request.key === 'string' && config.request.key.length > 0) {
-        defaults.key = fs.readFileSync(config.request.key);
-    }
+    return true;
+  }
+  return !(isLoopBackIp(entity.value) || isLinkLocalAddress(entity.value) || isPrivateIP(entity));
+};
 
-    if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
-        defaults.passphrase = config.request.passphrase;
-    }
+function isUpperCase(str) {
+  return str === str.toUpperCase();
+}
 
-    if (typeof config.request.ca === 'string' && config.request.ca.length > 0) {
-        defaults.ca = fs.readFileSync(config.request.ca);
-    }
+function getSummaryTags(body) {
+  const tags = [];
 
-    if (typeof config.request.proxy === 'string' && config.request.proxy.length > 0) {
-        defaults.proxy = config.request.proxy;
-    }
+  if (body.privacy && body.privacy.vpn) {
+    tags.push('VPN');
+  }
 
-    requestDefault = request.defaults(defaults);
+  if (body.privacy && body.privacy.proxy) {
+    tags.push('Proxy');
+  }
+
+  if (body.privacy && body.privacy.tor) {
+    tags.push('Tor');
+  }
+
+  if (body.privacy && body.privacy.hosting) {
+    tags.push('Hosting');
+  }
+
+  if (body.org) {
+    // The `org` property is only on the free plan and includes both the ASN# and org info
+    // For example, "AS15169 Google LLC"
+    // we only want the org info so we split off the ASN#
+    let tokens = body.org.split(' ');
+    if (tokens.length > 1) {
+      let orgName = tokens.slice(1).join(' ');
+      // some org names are in all uppercase which looks bad so we make those lowercase
+      if (isUpperCase(orgName)) {
+        tags.push(orgName.toLowerCase());
+      } else {
+        tags.push(orgName);
+      }
+    }
+  } else if (body.asn && body.asn.name) {
+    // paid plans use the more details asn object
+    // some org names are in all uppercase which looks bad so we make those lowercase
+    if (isUpperCase(body.asn.name)) {
+      tags.push(body.asn.name.toLowerCase());
+    } else {
+      tags.push(body.asn.name);
+    }
+  }
+
+  if (body.country) {
+    let country = countryLookup.byIso(body.country);
+    if (country) {
+      // this is the full country name
+      tags.push(country.country);
+    } else {
+      // this is the 2 digit code provided by IPInfo
+      tags.push(body.country);
+    }
+  }
+
+  return tags;
+}
+
+function startup(logger) {
+  Logger = logger;
+
+  let defaults = {};
+
+  if (typeof config.request.cert === 'string' && config.request.cert.length > 0) {
+    defaults.cert = fs.readFileSync(config.request.cert);
+  }
+
+  if (typeof config.request.key === 'string' && config.request.key.length > 0) {
+    defaults.key = fs.readFileSync(config.request.key);
+  }
+
+  if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
+    defaults.passphrase = config.request.passphrase;
+  }
+
+  if (typeof config.request.ca === 'string' && config.request.ca.length > 0) {
+    defaults.ca = fs.readFileSync(config.request.ca);
+  }
+
+  if (typeof config.request.proxy === 'string' && config.request.proxy.length > 0) {
+    defaults.proxy = config.request.proxy;
+  }
+
+  requestDefault = request.defaults(defaults);
 }
 
 module.exports = {
-    doLookup: doLookup,
-    startup: startup
+  doLookup: doLookup,
+  startup: startup
 };
