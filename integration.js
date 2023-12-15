@@ -21,7 +21,9 @@ function doLookup(entities, options, cb) {
   let lookupResults = [];
   let tasks = [];
 
-  Logger.trace(entities);
+  Logger.trace({ entities }, 'doLookup');
+
+  // This block of code is specifically for testing sample enterprise data results:
 
   // const data = require('./test/test-ip-data.json');
   // return cb(null, [
@@ -53,6 +55,8 @@ function doLookup(entities, options, cb) {
               entity: entity.value,
               detail: 'Error in Request'
             });
+
+          Logger.trace({ statusCode: res.statusCode, body }, 'Lookup Result');
 
           if (res.statusCode === 200) {
             return done(null, {
@@ -96,7 +100,26 @@ function doLookup(entities, options, cb) {
     }
 
     results.forEach((result) => {
-      if (result.bogon || !result.body) {
+      /**
+       There are strange 200 responses for some IPv6 results that look like this:
+        ```
+        body: {
+          "ip": "2345:425:2ca1::567:5673:23b5",
+          "readme": "https://ipinfo.io/missingauth"
+        }
+       ```
+
+       and in other cases like this:
+
+       ```
+       body: {
+        "ip": "2345:425:2ca1::567:5673:23b5",
+        }
+       ```
+
+       We try to filter these out using the Object.keys length call
+      **/
+      if (!result.body || result.body.bogon || Object.keys(result.body).length <= 2) {
         lookupResults.push({
           entity: result.entity,
           data: null
@@ -137,8 +160,15 @@ const isPrivateIP = (entity) => {
 };
 
 const isValidIp = (entity) => {
-  if (entity.isIPv6 && new Address6(entity.value).isValid() === false) {
-    return false;
+  if (entity.isIPv6) {
+    try {
+      // throws an error if the IP is not a valid IPv6
+      let ipv6 = new Address6(entity.value);
+    } catch (err) {
+      return false;
+    }
+
+    return true;
   }
   return !(isLoopBackIp(entity.value) || isLinkLocalAddress(entity.value) || isPrivateIP(entity));
 };
