@@ -10,6 +10,23 @@ ipinfo is a REST based service that provides information about IPv4 and IPv6 add
 
 Please see [https://ipinfo.io](https://ipinfo.io) for more information.
 
+## Displayed Information
+
+The information displayed by the integration depends on the level of your API key.  The following table shows the available information displayed for each level of API key:
+
+| Data Type   | Free | Basic   | Standard | Business  | Enterprise |
+|-------------|------|---------|----------|-----------|------------|
+| Geolocation | ✓    | ✓       | ✓        | ✓         | ✓          |
+| ASN         | ✓    | ✓       | ✓        | ✓         | ✓          |
+| Privacy     |      |         | ✓        | ✓         | ✓          |
+| Company     |      |         |          | ✓         | ✓          |
+| Carrier     |      |         |          | ✓         | ✓          |
+| Carrier     |      |         |          | ✓         | ✓          |
+| Abuse       |      |         |          | ✓         | ✓          |
+| Domains     |      |         |          | ✓         | ✓          |
+
+
+
 ## ipinfo Integration Options
 
 ### ipinfo Access Token
