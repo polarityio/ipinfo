@@ -28,6 +28,11 @@
     "hosting": true,
     "service": ""
   },
+  "carrier": {
+    "name": "Sprint Corporation",
+    "mcc": "310",
+    "mnc": "120"
+  },
   "abuse": {
     "address": "US, CA, Mountain View, 1600 Amphitheatre Parkway, 94043",
     "country": "US",

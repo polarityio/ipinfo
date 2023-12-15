@@ -185,6 +185,32 @@
     </div>
   {{/if}}
 
+  {{!-- Carrier fields are only available on Business, and Enterprise plans --}}
+  {{#if details.carrier}}
+    <h1 class="p-title">
+      {{fa-icon icon="phone-office" fixedWidth=true}}
+      Carrier Info
+    </h1>
+  {{/if}}
+  {{#if details.carrier.name}}
+    <div>
+      <span class="p-key">Name: </span>
+      <span class="p-value">{{details.carrier.name}}</span>
+    </div>
+  {{/if}}
+  {{#if details.carrier.mcc}}
+    <div>
+      <span class="p-key">MCC: </span>
+      <span class="p-value">{{details.carrier.mcc}}</span>
+    </div>
+  {{/if}}
+  {{#if details.carrier.mnc}}
+    <div>
+      <span class="p-key">MNC: </span>
+      <span class="p-value">{{details.carrier.mnc}}</span>
+    </div>
+  {{/if}}
+
   {{!-- Domain fields are only available on Business, and Enterprise plans --}}
   {{#if details.domains}}
     <h1 class="p-title">
